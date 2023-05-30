@@ -1,7 +1,7 @@
 # DistributedSystemUsing_IPC_Synchronization_Threads
 Distributed System using Inter Process Comunications (IPC), Threads, and Synchronization 
 
-###Projekt në lëndën Sisteme Operative
+### Projekt në lëndën Sisteme Operative
 <pre>
 Punuar nga :
 Valtrina Cacaj,
@@ -10,4 +10,4 @@ Visar Gjema,
 Zana Misini
 </pre>
 
-####Prishtinë 2023
+#### Prishtinë 2023

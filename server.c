@@ -1,12 +1,31 @@
 #include <stdio.h>
+
 #include <stdlib.h>
+
 #include <string.h>
+
 #include <sys/ipc.h>
+
 #include <sys/msg.h>
+
 #include <pthread.h>
+
 #include <unistd.h>
 
+#include <sys/types.h>
+
+#include <sys/wait.h>
+
+#include <sys/shm.h>
+
+#include <fcntl.h>
+
+#include <sys/stat.h>
+
+
+
 #define MAX_BUFFER_SIZE 256
+
 #define MAX_CLIENTS 2
 
 
@@ -34,6 +53,12 @@ typedef struct {
     int connected_clients;
 
     int client_counter;
+
+    int pipe_fd[2];
+
+    int shm_id;
+
+    char* shm_ptr;
 
 } shared_data_t;
 
@@ -74,8 +99,11 @@ void* clientThread(void* arg) {
     pthread_mutex_unlock(&shared_data->mutex);
 
 
+
     // Client loop
-int client =0;
+
+    int client = 0;
+
     while (client < MAX_CLIENTS) {
 
         // Receive message from clients
@@ -127,9 +155,12 @@ int client =0;
             error("Error sending message to client");
 
         }
+
         client++;
 
     }
+
+
 
     // Decrement connected_clients count and signal server
 
@@ -182,6 +213,36 @@ int main() {
     if (msqid < 0) {
 
         error("Error connecting to message queue");
+
+    }
+
+
+
+    // Create pipe
+
+    if (pipe(shared_data.pipe_fd) == -1) {
+
+        error("Error creating pipe");
+
+    }
+
+
+
+    // Create shared memory
+
+    shared_data.shm_id = shmget(key, MAX_BUFFER_SIZE, IPC_CREAT | 0666);
+
+    if (shared_data.shm_id == -1) {
+
+        error("Error creating shared memory");
+
+    }
+
+    shared_data.shm_ptr = (char*)shmat(shared_data.shm_id, NULL, 0);
+
+    if (shared_data.shm_ptr == (char*)-1) {
+
+        error("Error attaching shared memory");
 
     }
 
@@ -240,6 +301,22 @@ int main() {
     pthread_mutex_destroy(&shared_data.mutex);
 
     pthread_cond_destroy(&shared_data.cond);
+
+
+
+    // Close the pipe
+
+    close(shared_data.pipe_fd[0]);
+
+    close(shared_data.pipe_fd[1]);
+
+
+
+    // Detach and remove shared memory
+
+    shmdt(shared_data.shm_ptr);
+
+    shmctl(shared_data.shm_id, IPC_RMID, NULL);
 
 
 

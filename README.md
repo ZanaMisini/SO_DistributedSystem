@@ -9,5 +9,6 @@ Vera Llugiqi,
 Visar Gjema, 
 Zana Misini
 </pre>
+##### Projekti i plotëson të gjitha kërkesat obligative si dhe bonus kërkesat.
 
 #### Prishtinë 2023
